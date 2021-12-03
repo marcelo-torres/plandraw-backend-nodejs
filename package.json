@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "i": "^0.3.7",
+    "joi": "^17.4.2",
     "joy": "^0.1.1",
     "mongodb-memory-server": "^8.0.3",
     "npm": "^8.1.4"
