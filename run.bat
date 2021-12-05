@@ -1,1 +1,1 @@
-nodemon server.js
+nodemon -r dotenv/config server.js 

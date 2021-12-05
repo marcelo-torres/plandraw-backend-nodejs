@@ -50,12 +50,14 @@ app.use(function (req, res, next) {
     next();
 });
 
-const port = 8081;
-app.listen(port, () => console.log(`Listenning on port ${port}...`));
+const port = process.env.PORT;
+app.listen(port, () => {
+    console.log(`Listenning on port ${port}...`)
+    console.log();
+});
 
 app.post('/api/v1/plandraw/diagram/', async (req, res) => {
     var insertedId = await databaseModule.addDiagram(req.body);
-
     if(insertedId) {
         res.status(201);
         res.send({
@@ -63,28 +65,21 @@ app.post('/api/v1/plandraw/diagram/', async (req, res) => {
             status: 'ok'
         });
     } else {
-        res.statusCode = 500;
-        res.send({
-            status: 'error'
-        });
+        returnError(res, 500, "Error. Diagram not created");
     }
 });
 
 app.put('/api/v1/plandraw/diagram/:id', async (req, res) => {
     var id = req.params.id;
-    console.log('saving...', req.body);
     var success = await databaseModule.updateDiagram(req.body, id);
 
-    console.log(success);
+    console.log("Diagram updated with success? ", success);
 
     if(success) {
         res.status(204);
         res.json();
     } else {
-        res.status(500);
-        res.json({
-            status: 'error'
-        });
+        returnError(res, 500, "");
     }
 });
 
@@ -92,10 +87,13 @@ app.get('/api/v1/plandraw/diagram/:id', async (req, res) => {
     var id = req.params.id;
 
     var diagram = await databaseModule.getDiagramById(id);
-    console.log(diagram);
 
-    res.status(200);
-    res.json(diagram);
+    if(diagram) {
+        res.status(200);
+        res.json(diagram);
+    } else {
+        returnError(res, 404, "Diagram no found");
+    }
 });
 
 app.get('/api/v1/plandraw/diagram', async (req, res) => {
@@ -122,20 +120,13 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
     var property = req.body.property;
 
     if(!validateProperty(property)) {
-        res.status(400);
-        res.json({
-            status: "error",
-            message: "Must include fields property.name, property.value and property.writable"
-        });
+        returnError(res, 400, "Must include fields property.name, property.value and property.writable");
     }
 
     var diagram = await databaseModule.getDiagramById(diagramId);
     if(!diagram) {
-        res.status(404);
-        res.json({
-            status: "error",
-            message: "diagram not found"
-        });
+        returnError(res, 404, "Diagram not found");
+        return;
     }
 
     var updated = diagramService.updateProperty(diagram, businessId, property);
@@ -147,23 +138,8 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
     }
     console.log(success);
 
-    //var diagram = await databaseModule.getDiagramById(diagramId);
-    //var x = await databaseModule.updateProperty(diagramId, businessId, property);
-    
-    /*
-    businessObject: {
-    type: 'service',
-    name: 'Venda',
-    id: 'java-service-vendas',
-    properties: [
-      {
-        writable: false,
-        name: 'Owner',
-        value: 'Squad de Vendas'
-      },
-    */
 
-      if(success) {
+    if(success) {
         res.status(204);
         res.json();
     } else {
@@ -172,19 +148,12 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
             status: 'error'
         });
     }
-
-    /*var insertedId = await databaseModule.addDiagram(req.body);
-
-    if(insertedId) {
-        res.status(201);
-        res.send({
-            insertedId: insertedId,
-            status: 'ok'
-        });
-    } else {
-        res.statusCode = 500;
-        res.send({
-            status: 'error'
-        });
-    }*/
 });
+
+function returnError(res, statusCode, message) {
+    res.status(statusCode);
+    res.json({
+        status: 'error',
+        message: message
+    });
+}
