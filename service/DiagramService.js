@@ -9,7 +9,7 @@ exports.updateProperty = (diagram, elementBusinessId, property) => {
           if(businessObject.id === elementBusinessId) {
             if(businessObject.properties) {
               for (var i = 0; i < businessObject.properties.length; i++) {
-                if(businessObject.properties[i].name === property.name) {
+                if(businessObject.properties[i] && businessObject.properties[i].name === property.name) {
                   businessObject.properties[i] = property;
                   propertyUpdated = true;
                   break;
@@ -19,8 +19,6 @@ exports.updateProperty = (diagram, elementBusinessId, property) => {
                 businessObject.properties.push(property);
                 propertyUpdated = true;
               }
-
-              console.log(businessObject.properties);
             }
           }
         }

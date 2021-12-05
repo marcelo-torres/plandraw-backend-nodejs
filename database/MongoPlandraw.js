@@ -1,6 +1,8 @@
 const { MongoClient, ObjectId } = require("mongodb");
 
 const uri = "mongodb://localhost:27017/?maxPoolSize=20&w=majority";
+//const uri = "mongodb://35.243.215.124:27017/?maxPoolSize=20&w=majority";
+
 
 exports.addDiagram = async (diagram) => {
   const client = new MongoClient(uri);
@@ -93,6 +95,8 @@ exports.getAllById = async () => {
   }
 };
 
+
+/*
 exports.updateProperty = async (diagramId, elementBusinessId, property) => {
   const client = new MongoClient(uri);
   try {
@@ -110,45 +114,26 @@ exports.updateProperty = async (diagramId, elementBusinessId, property) => {
     const query = { _id: ObjectId(diagramId) };
     const options = null;
 
-    var result = await collection.findOne(query);
-
-    var propertyUpdated = false;
-    if(result && result.elements) {
-      for(const element of result.elements) {
-        if(element.data && element.data.businessObject) {
-          var businessObject = element.data.businessObject;
-          if(businessObject.id === elementBusinessId) {
-            if(businessObject.properties) {
-              for (var i = 0; i < businessObject.properties.length; i++) {
-                if(businessObject.properties[i].name === property.name) {
-                  businessObject.properties[i] = property;
-                  propertyUpdated = true;
-                  break;
-                }
-              }
-              if(!propertyUpdated) {
-                businessObject.properties.push(property);
-              }
-
-              console.log(businessObject.properties);
-            }
-          }
-        }
-      }
+    var diagram = await collection.findOne(query);
+    if(!diagram) {
+      return null;
     }
 
+    var propertyUpdated = updateProperty(diagram, elementBusinessId, property)
+    
     var r = await collection.updateMany(
       query,
-      {$set: result},
+      {$set: diagram},
       function(err, res) {
         if (err) throw err;
         console.log("1 document updated");
         db.close();
       }
     )
-    console.log(r);
 
-    /*
+    console.log("a");
+
+    
     const query = { _id: ObjectId(diagramId) };
     const options = {
       sort: { name: 1 },
@@ -157,11 +142,11 @@ exports.updateProperty = async (diagramId, elementBusinessId, property) => {
 
     const cursor = await collection.find(query, options);
     const allValues = await cursor.toArray();
-    return allValues;*/
+    return allValues;
 
     return '';
   } finally {
     // Ensures that the client will close when you finish/error
     await client.close();
-  }
-}
+  } 
+}*/

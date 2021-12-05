@@ -33,7 +33,8 @@ app.use(cors({origin: 'http://localhost:8888'}));
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -109,7 +110,9 @@ app.get('/api/v1/plandraw/diagram/:id/services', async (req, res) => {
     var services = diagramService.getServicesFromDiagram(diagram);
 
     res.status(200);
-    res.json(services.map(s => s.id));
+    res.json(services.map(s => {
+        return {id: s.id, name: s.name}
+    }));
 });
 
 app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', async (req, res) => {
@@ -117,6 +120,7 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
     var businessId = req.params.businessId;
 
     var property = req.body.property;
+
     if(!validateProperty(property)) {
         res.status(400);
         res.json({
@@ -126,6 +130,14 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
     }
 
     var diagram = await databaseModule.getDiagramById(diagramId);
+    if(!diagram) {
+        res.status(404);
+        res.json({
+            status: "error",
+            message: "diagram not found"
+        });
+    }
+
     var updated = diagramService.updateProperty(diagram, businessId, property);
     console.log(updated);
 
