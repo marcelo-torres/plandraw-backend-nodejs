@@ -162,12 +162,15 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
 
 /* ##################### */
 
-app.get('/api/v1/plandraw/site/access-count/', async (req, res) => {
-    var ids = await databaseModule.getSiteAccessCount('access-site-count');
+app.get('/api/v1/plandraw/site/access-count/:id', async (req, res) => {
+    var id = req.params.id;
+    var ids = await databaseModule.getSiteAccessCount(id);
     res.json(ids);
 });
 
-app.post('/api/v1/plandraw/site/access-count/', async (req, res) => {
+app.post('/api/v1/plandraw/site/access-count/:id', async (req, res) => {
+
+    var id = req.params.id;
 
     if(!validateAccessCount(req.body)) {
         returnError(res, 400, "Must include field lastTime");
@@ -175,10 +178,10 @@ app.post('/api/v1/plandraw/site/access-count/', async (req, res) => {
 
     var lastTime = req.body.lastTime;
 
-    var accessCountObj = await databaseModule.getSiteAccessCount('access-site-count');
+    var accessCountObj = await databaseModule.getSiteAccessCount(id);
     if(!accessCountObj) {
         var accessCountObj = {
-            id: 'access-site-count',
+            id: id,
             lastTime: lastTime,
             accessCount: 1
         };
