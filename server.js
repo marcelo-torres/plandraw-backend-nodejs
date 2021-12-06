@@ -119,6 +119,8 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
 
     var property = req.body.property;
 
+    console.log(diagramId, " / ", businessId);
+
     if(!validateProperty(property)) {
         returnError(res, 400, "Must include fields property.name, property.value and property.writable");
     }

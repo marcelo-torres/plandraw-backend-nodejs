@@ -39,7 +39,8 @@ exports.updateDiagram = async (diagram, diagramId) => {
     const options = {}
 
     const result = await collection.replaceOne(filter, diagram);
-    var success = (result && result.modifiedCount > 0);
+    console.log(result);
+    var success = (result && result.matchedCount > 0);
     return success;
   } catch(e) {
       console.log(e);
