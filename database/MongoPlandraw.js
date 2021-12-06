@@ -104,3 +104,61 @@ exports.getAllById = async () => {
     await client.close();
   }
 };
+
+/*  -------------------------  */
+
+exports.getSiteAccessCount = async (id) => {
+  const client = new MongoClient(uri);
+  try {
+
+    await client.connect();
+    await client.db("admin").command({ ping: 1 });
+    console.log("Connected successfully to server");
+
+    const database = client.db("plandraw");
+    const collection = database.collection("site");
+
+    const query = { id: id };
+    const options = null;
+
+    var result = await collection.findOne(query);
+
+    return result;
+  } catch(e) {
+    console.log(e);
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+};
+
+exports.createUpdateSiteAccessCount = async (accessCountObj) => {
+  const client = new MongoClient(uri);
+  try {
+
+    await client.connect();
+    await client.db("admin").command({ ping: 1 });
+    console.log("Connected successfully to server");
+
+    const database = client.db("plandraw");
+    const collection = database.collection("site");
+
+    const filter = { id: accessCountObj.id };
+    const options = {upsert: true}
+
+    const createUpdate = {
+      $set: accessCountObj
+    }
+
+    const result = await collection.updateOne(filter, createUpdate, options);
+
+    console.log(result);
+    var success = (result && (result.matchedCount > 0 || result.upsertedCount > 0));
+    return success;
+  } catch(e) {
+      console.log(e);
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+};

@@ -18,6 +18,14 @@ function validateProperty(property) {
     return schema.validate(property);
 }
 
+function validateAccessCount(property) {
+    const schema = Joi.object({
+        lastTime: Joi.string().min(1).required
+    });
+
+    return schema.validate(property);
+}
+
 /* 
 
 // Accepted answer is fine, in case you prefer something shorter, you may use a plugin called cors available for Express.js
@@ -151,6 +159,46 @@ app.post('/api/v1/plandraw/diagram/:diagramId/element/:businessId/property', asy
         });
     }
 });
+
+/* ##################### */
+
+app.get('/api/v1/plandraw/site/access-count/', async (req, res) => {
+    var ids = await databaseModule.getSiteAccessCount('access-site-count');
+    res.json(ids);
+});
+
+app.post('/api/v1/plandraw/site/access-count/', async (req, res) => {
+
+    if(!validateAccessCount(req.body)) {
+        returnError(res, 400, "Must include field lastTime");
+    }
+
+    var lastTime = req.body.lastTime;
+
+    var accessCountObj = await databaseModule.getSiteAccessCount('access-site-count');
+    if(!accessCountObj) {
+        var accessCountObj = {
+            id: 'access-site-count',
+            lastTime: lastTime,
+            accessCount: 1
+        };
+    } else {
+        accessCountObj.accessCount += 1;
+        accessCountObj.lastTime = lastTime;
+    }
+    var success = await databaseModule.createUpdateSiteAccessCount(accessCountObj);
+
+    if(success) {
+        res.status(201);
+        res.send({
+            status: 'ok'
+        });
+    } else {
+        returnError(res, 500, "Error. Access site count not created/updated");
+    }
+});
+
+/* ##################### */
 
 function returnError(res, statusCode, message) {
     res.status(statusCode);
